@@ -6,12 +6,12 @@
 TaskHandle_t StartTask_Handler;		//任务句柄
 void start_task(void *pvParameters);		//任务函数
 
-#define MotorControl_TASK_PRIO		5		//任务优先级
+#define MotorControl_TASK_PRIO		4		//任务优先级
 #define MotorControl_STK_SIZE 		1024  //任务堆栈大小
 TaskHandle_t MotorControlTask_Handler;		//任务句柄
 void MotorControl_task(void *pvParameters);	//任务函数
 
-#define Debug_TASK_PRIO		3		//任务优先级
+#define Debug_TASK_PRIO		4		//任务优先级
 #define Debug_STK_SIZE 		512  //任务堆栈大小	
 TaskHandle_t DebugTask_Handler;		//任务句柄
 void Debug_task(void *pvParameters);		//任务函数
