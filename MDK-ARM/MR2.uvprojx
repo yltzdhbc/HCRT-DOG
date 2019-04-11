@@ -641,6 +641,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\BSP\bsp_can.c</FilePath>
             </File>
+            <File>
+              <FileName>vcan.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\BSP\vcan.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -26,6 +26,7 @@
 #include "can.h"
 #include "tim.h"
 #include "spi.h"
+#include "dma.h"
 
 /* APP ------------------------------------------------------------------*/
 #include "posture_ctrl.h"
@@ -42,5 +43,5 @@
 /* BSP ------------------------------------------------------------------*/
 #include "bsp_can.h"
 #include "pid.h"
-
+#include "vcan.h"
 #endif /* __ROBOCON_H */

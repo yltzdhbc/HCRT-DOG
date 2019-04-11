@@ -6,17 +6,17 @@
 TaskHandle_t StartTask_Handler;		//任务句柄
 void start_task(void *pvParameters);		//任务函数
 
-#define MotorControl_TASK_PRIO		2		//任务优先级
+#define MotorControl_TASK_PRIO		5		//任务优先级
 #define MotorControl_STK_SIZE 		1024  //任务堆栈大小
 TaskHandle_t MotorControlTask_Handler;		//任务句柄
 void MotorControl_task(void *pvParameters);	//任务函数
 
-#define Debug_TASK_PRIO		4		//任务优先级
+#define Debug_TASK_PRIO		3		//任务优先级
 #define Debug_STK_SIZE 		512  //任务堆栈大小	
 TaskHandle_t DebugTask_Handler;		//任务句柄
 void Debug_task(void *pvParameters);		//任务函数
 
-#define PostureControl_TASK_PRIO		2		//任务优先级
+#define PostureControl_TASK_PRIO		4		//任务优先级
 #define PostureControl_STK_SIZE 		512 	 //任务堆栈大小	
 TaskHandle_t PostureControlTask_Handler;		//任务句柄
 void PostureControl_task(void *pvParameters);		//任务函数
@@ -26,28 +26,37 @@ void PostureControl_task(void *pvParameters);		//任务函数
 TaskHandle_t Task4Task_Handler;		//任务句柄
 void task4_task(void *pvParameters);		//任务函数
 
-#define TASK5_TASK_PRIO		2		//任务优先级
-#define TASK5_STK_SIZE 		512 	 //任务堆栈大小	
-TaskHandle_t Task5Task_Handler;		//任务句柄
-void task5_task(void *pvParameters);		//任务函数
+#define TEST_TASK_PRIO		4		//任务优先级
+#define TEST_STK_SIZE 		512 	 //任务堆栈大小	
+TaskHandle_t TestTask_Handler;		//任务句柄
+void Test_task(void *pvParameters);		//任务函数
 
 void SystemClock_Config(void);
+static void MX_NVIC_Init(void);
 
 int main(void)
 {
     HAL_Init();						//Hal库初始化
     SystemClock_Config();	//系统时钟初始化
     MX_GPIO_Init();				//GPIO初始化
+		MX_DMA_Init();
     MX_CAN1_Init();				//CAN1接口初始化
+		MX_CAN2_Init();
     MX_SPI5_Init();				//spi5初始化
     MX_USART2_UART_Init();//usart2串口初始化
+		MX_UART7_Init();
+		MX_NVIC_Init();
+		
     TIM3_Init(10-1,9000-1);//定时器3初始化，定时器时钟为90M，分频系数为9000-1,所以定时器3的频率为90M/9000=10K，自动重装载为10-1，那么定时器周期就是1ms
 
     moto_param_init();		//电机PID参数初始化
     buzzer_init(500-1, 90-1);//蜂鸣器初始化
     led_configuration();	//流水灯 红绿灯初始化
     Servo_Init(20000-1,90-1);		//f=Tck/(psc+1)*(arr+1) 定时器时钟为90M  50Hz=180MHz/(3000*1200)   330HZ=180MHZ/(3000*182)
-//		HAL_UART_Receive_DMA(&huart2, USART2RxBuf, USART2RXBUFSIZE);
+	
+//HAL_UART_Transmit_DMA(&huart2, (uint8_t*)res, 4);
+	
+//	HAL_UART_Receive_DMA(&huart2, USART2RxBuf, USART2RXBUFSIZE);
 //	mpu_device_init();
 //	init_quaternion();
 //		Servo1_DOWN;
@@ -100,13 +109,13 @@ void start_task(void *pvParameters)
                 (void*          )NULL,
                 (UBaseType_t    )TASK4_TASK_PRIO,
                 (TaskHandle_t*  )&Task4Task_Handler);
-    //创建TASK5任务
-    xTaskCreate((TaskFunction_t )task5_task,
-                (const char*    )"task5_task",
-                (uint16_t       )TASK5_STK_SIZE,
+    //创建Test任务
+    xTaskCreate((TaskFunction_t )Test_task,
+                (const char*    )"test_task",
+                (uint16_t       )TEST_STK_SIZE,
                 (void*          )NULL,
-                (UBaseType_t    )TASK5_TASK_PRIO,
-                (TaskHandle_t*  )&Task5Task_Handler);
+                (UBaseType_t    )TEST_TASK_PRIO,
+                (TaskHandle_t*  )&TestTask_Handler);
 
     vTaskDelete(StartTask_Handler); //删除开始任务
     taskEXIT_CRITICAL();            //退出临界区
@@ -115,21 +124,29 @@ void start_task(void *pvParameters)
 uint32_t Timetick1ms = 0;
 
 
-void task5_task(void *pvParameters)
+void Test_task(void *pvParameters)
 {
 
+	int count=0;
     for(;;) {
 
 //	mpu_get_data();
 //	imu_ahrs_update();
 //	imu_attitude_update();
 //	HAL_Delay(5);
-//	printf(" Roll: %8.3lf    Pitch: %8.3lf    Yaw: %8.3lf\n", imu.rol, imu.pit, imu.yaw);
+//	printf(" Roll:  \n");
 //	//HAL_UART_Transmit(&huart6, (uint8_t *)buf, (COUNTOF(buf)-1), 55);
 //	HAL_Delay(5);
 //
 //	Servo_DOWN;
-        vTaskDelay(100);
+			
+			
+		wave_form_data[0] =(short)count;
+	
+			count+=10;
+        vTaskDelay(1000);
+			
+			
 //		Servo_PEAK;
 
     }
@@ -189,7 +206,18 @@ void SystemClock_Config(void)
     /* SysTick_IRQn interrupt configuration */
     HAL_NVIC_SetPriority(SysTick_IRQn, 15, 0);
 }
-
+static void MX_NVIC_Init(void)
+{
+  /* USART2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(USART2_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(USART2_IRQn);
+  /* DMA1_Stream5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
+  /* DMA1_Stream6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
+}
 
 void Error_Handler(void)
 {

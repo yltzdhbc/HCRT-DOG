@@ -18,6 +18,7 @@ uint16_t get_result_digitals(void);
 
 extern int temp;
 
+
 /*******************************************************************************************
 	*@ 函数名称：void task2_task(void *pvParameters)
 	*@ 功能： 接收上位机指令 进入调试模式 监听uart2数据 更改电机速度 位置 寄存器
