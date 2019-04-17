@@ -4,15 +4,14 @@ uint8_t res[4]={0xff,0xfe,0x50,0x23};
 void task4_task(void *pvParameters)
 {
 	
-	
-	
+
     BeginWarnBuzzer();
     for(;;)
     {
         for (int i = 0; i < 8; i++)
             flow_led_off(i);
 			
-
+			
         vTaskDelay(500);
 
         for (int i = 0; i < 8; i++)

@@ -31,6 +31,12 @@ void task4_task(void *pvParameters);		//任务函数
 TaskHandle_t TestTask_Handler;		//任务句柄
 void Test_task(void *pvParameters);		//任务函数
 
+#define VcanGC_TASK_PRIO		4		//任务优先级
+#define VcanGC_STK_SIZE 		512 	 //任务堆栈大小	
+TaskHandle_t VcanGCTask_Handler;		//任务句柄
+void VcanGC_task(void *pvParameters);		//任务函数
+
+
 void SystemClock_Config(void);
 static void MX_NVIC_Init(void);
 
@@ -46,25 +52,26 @@ int main(void)
     MX_USART2_UART_Init();//usart2串口初始化
 		MX_UART7_Init();
 		MX_NVIC_Init();
-		
-    TIM3_Init(10-1,9000-1);//定时器3初始化，定时器时钟为90M，分频系数为9000-1,所以定时器3的频率为90M/9000=10K，自动重装载为10-1，那么定时器周期就是1ms
+		//定时器时钟90M分频系数9000-1,定时器3的频率90M/9000=10K自动重装载10-1,定时器周期1ms
+    TIM3_Init(10-1,9000-1);
 
     moto_param_init();		//电机PID参数初始化
     buzzer_init(500-1, 90-1);//蜂鸣器初始化
     led_configuration();	//流水灯 红绿灯初始化
-    Servo_Init(20000-1,90-1);		//f=Tck/(psc+1)*(arr+1) 定时器时钟为90M  50Hz=180MHz/(3000*1200)   330HZ=180MHZ/(3000*182)
+		//f=Tck/(psc+1)*(arr+1) 定时器时钟为90M  50Hz=180MHz/(3000*1200)   330HZ=180MHZ/(3000*182)
+    Servo_Init(20000-1,90-1);		
 	
-//HAL_UART_Transmit_DMA(&huart2, (uint8_t*)res, 4);
-	
+//	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)res, 4);
 //	HAL_UART_Receive_DMA(&huart2, USART2RxBuf, USART2RXBUFSIZE);
 //	mpu_device_init();
 //	init_quaternion();
-//		Servo1_DOWN;
-//		Servo2_DOWN_POS;
+//	Servo1_DOWN;
+//	Servo2_DOWN_POS;
 
     Servo1_TEST_POSITION;
     Servo2_TEST_POSITION;
 		printf("system init\r\n");
+		
     //创建开始任务
     xTaskCreate((TaskFunction_t )start_task,            //任务函数
                 (const char*    )"start_task",          //任务名称
@@ -111,12 +118,19 @@ void start_task(void *pvParameters)
                 (TaskHandle_t*  )&Task4Task_Handler);
     //创建Test任务
     xTaskCreate((TaskFunction_t )Test_task,
-                (const char*    )"test_task",
+                (const char*    )"Test_task",
                 (uint16_t       )TEST_STK_SIZE,
                 (void*          )NULL,
                 (UBaseType_t    )TEST_TASK_PRIO,
                 (TaskHandle_t*  )&TestTask_Handler);
-
+ //创建VcanGC任务
+    xTaskCreate((TaskFunction_t )VcanGC_task,
+                (const char*    )"VcanGC_task",
+                (uint16_t       )VcanGC_STK_SIZE,
+                (void*          )NULL,
+                (UBaseType_t    )VcanGC_TASK_PRIO,
+                (TaskHandle_t*  )&VcanGCTask_Handler);
+								
     vTaskDelete(StartTask_Handler); //删除开始任务
     taskEXIT_CRITICAL();            //退出临界区
 
@@ -141,10 +155,11 @@ void Test_task(void *pvParameters)
 //	Servo_DOWN;
 			
 			
-		wave_form_data[0] =(short)count;
-	
-			count+=10;
-        vTaskDelay(1000);
+		wave_form_data[0] =count;
+		wave_form_data[1] =count;
+		wave_form_data[2] =count;
+		count+=10;
+    vTaskDelay(500);
 			
 			
 //		Servo_PEAK;
