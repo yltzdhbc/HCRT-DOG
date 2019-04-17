@@ -13,16 +13,16 @@ void SinTrajectory (float t, GaitParams params, float gait_offset) ;
 void CartesianToTheta(float leg_direction) ;
 void SetCoupledPosition(int LegId);
 void CommandAllLegs(void);
+bool IsValidLegGain( LegGain gains);
+bool IsValidGaitParams( GaitParams params);
+void ChangeTheGainsOfPD(LegGain gains);
 
-static  float x;
-static  float y;
-static  float theta1;
-static  float theta2;
+static  float x, y, theta1, theta2;
 
 enum States state = STOP;
-//Coordinate_Trans_Data coor_calc;
+
 extern TaskHandle_t MotorControlTask_Handler;
-extern void pid_reset_kpkd(pid_t*pid, float kp, float kd);
+
 //初始化步态参数
 GaitParams gait_params = {17.3,12.0,4.0,0.00,0.25,1};
 //初始化步态增益
@@ -74,7 +74,6 @@ GaitParams state_gait_params[] = {
 *  {17.3, 12.00, 4.0, 0.00, 0.35, 2.5}, // WALK		ahead
 *
 */
-long rotate_start = 0; // milliseconds when rotate was commanded
 
 GaitParams gait_params_1 = {16.0, 16.00, 5.0, 0.00, 0.50, 2.0};
 GaitParams gait_params_2 = {16.0, 16.00, 5.0, 0.00, 0.20, 2.0};
@@ -120,18 +119,7 @@ void PostureControl_task(void *pvParameters)
             //	printf("\r\n x=%f  y=%f  theta1=%f  theta2=%f   he=%f ",x,y,theta1,theta2,theta1+theta2);
             break;
         case ROTATE:	//旋转
-            // printf("\r\n ROTATE");
-            //float theta;
-            //x=0;
-            //y=0.24;
-            //CartesianToTheta(1.0);
-            //float freq = 0.1;
-            //float phase = freq * (times - rotate_start)/1000.0f;
-            //theta = (-cos(2*PI * phase) + 1.0`f) * 0.5 * 2 * PI;
-            //CommandAllLegs();
-
             gait(gait_params, gait_gains, 0.0, 0.5, 0.75, 0.25, -1.0, -1.0, -1.0, -1.0);
-
             //	printf("\r\n x=%f  y=%f  theta1=%f  theta2=%f   he=%f ",x,y,theta1,theta2,theta1+theta2);
             break;
         case WALK_AHEAD:		//前进
@@ -158,8 +146,10 @@ void PostureControl_task(void *pvParameters)
     }
 }
 
-
-
+/**
+* NAME: void gait_detached
+* FUNCTION : 左右分离的腿部增益函数
+*/
 void gait_detached(	GaitParams params_left,GaitParams params_right,
                     float leg0_offset, float leg1_offset,float leg2_offset, float leg3_offset,
                     float leg0_direction, float leg1_direction,float leg2_direction, float leg3_direction) {
@@ -179,15 +169,20 @@ void gait_detached(	GaitParams params_left,GaitParams params_right,
     //  const float leg3_direction = 1.0;
     CoupledMoveLeg( t, params_right, leg3_offset, leg3_direction, 3);
 
+		
 }
 
 /**
 * NAME: void gait(	GaitParams params,float leg0_offset, float leg1_offset,float leg2_offset, float leg3_offset)
 * FUNCTION : 产生时间脉冲 设定每个腿的参数 调整腿的运行方向 进行补偿
 */
-void gait(	GaitParams params,LegGain gait_gains,
+void gait(	GaitParams params,LegGain gains,
             float leg0_offset, float leg1_offset,float leg2_offset, float leg3_offset,
             float leg0_direction, float leg1_direction,float leg2_direction, float leg3_direction) {
+
+    if (!IsValidGaitParams(params) || !IsValidLegGain(gains)) {
+        return;
+    }
 
     float t = times/1000.0;
 
@@ -203,12 +198,9 @@ void gait(	GaitParams params,LegGain gait_gains,
 
     //  const float leg3_direction = 1.0;
     CoupledMoveLeg( t, params, leg3_offset, leg3_direction, 3);
-
-//    for (int i = 0; i < 8; i++)
-//        pid_reset_kpkd(&pid_pos[i],gait_gains.kp_pos,gait_gains.kd_pos);
-
-//    for (int i = 0; i < 8; i++)
-//        pid_reset_kpkd(&pid_spd[i],gait_gains.kp_spd,gait_gains.kd_spd);
+		
+		//改变PD
+		ChangeTheGainsOfPD(gains);
 }
 
 /**
@@ -220,7 +212,39 @@ void CoupledMoveLeg(float t, GaitParams params,float gait_offset, float leg_dire
     SinTrajectory(t, params, gait_offset);		//足端摆线轨迹生成器
     CartesianToTheta(leg_direction);		//笛卡尔坐标转换到伽马坐标
     SetCoupledPosition(LegId);		//发送数据给电机驱动函数
-//    printf("\r\nt=%f x=%f  y=%f  theta1=%f  theta2=%f  legid=%d he%f",t,x,y,theta1,theta2,LegId,theta1+theta2);
+//  printf("\r\nt=%f x=%f  y=%f  theta1=%f  theta2=%f  legid=%d he%f",t,x,y,theta1,theta2,LegId,theta1+theta2);
+}
+
+/**
+* NAME: SinTrajectory (float t,GaitParams params, float gaitOffset)
+* FUNCTION : 正弦轨迹生成器
+*/
+void SinTrajectory (float t,GaitParams params, float gaitOffset) {
+    static float p = 0;
+    static float prev_t = 0;
+
+    float stanceHeight = params.stance_height;
+    float downAMP = params.down_amp;
+    float upAMP = params.up_amp;
+    float flightPercent = params.flight_percent;
+    float stepLength = params.step_length;
+    float FREQ = params.freq;
+
+    p += FREQ * (t - prev_t);
+    prev_t = t;
+
+    float gp = fmod((p+gaitOffset),1.0);
+    if (gp <= flightPercent) {
+        x = (gp/flightPercent)*stepLength - stepLength/2.0;
+        y = -upAMP*sin(PI*gp/flightPercent) + stanceHeight;
+    }
+    else {
+        float percentBack = (gp-flightPercent)/(1.0-flightPercent);
+        x = -percentBack*stepLength + stepLength/2.0;
+        y = downAMP*sin(PI*percentBack) + stanceHeight;
+    }
+
+    //  printf("\r\nt=%f x=%f y=%f",t,x,y);
 }
 
 /**
@@ -262,39 +286,6 @@ void CoupledMoveLeg(float t, GaitParams params,float gait_offset, float leg_dire
 //}
 
 /**
-* NAME: SinTrajectory (float t,GaitParams params, float gaitOffset)
-* FUNCTION : 正弦轨迹生成器
-*/
-void SinTrajectory (float t,GaitParams params, float gaitOffset) {
-    static float p = 0;
-    static float prev_t = 0;
-
-    float stanceHeight = params.stance_height;
-    float downAMP = params.down_amp;
-    float upAMP = params.up_amp;
-    float flightPercent = params.flight_percent;
-    float stepLength = params.step_length;
-    float FREQ = params.freq;
-
-    p += FREQ * (t - prev_t);
-    prev_t = t;
-
-    float gp = fmod((p+gaitOffset),1.0);
-    if (gp <= flightPercent) {
-        x = (gp/flightPercent)*stepLength - stepLength/2.0;
-        y = -upAMP*sin(PI*gp/flightPercent) + stanceHeight;
-    }
-    else {
-        float percentBack = (gp-flightPercent)/(1.0-flightPercent);
-        x = -percentBack*stepLength + stepLength/2.0;
-        y = downAMP*sin(PI*percentBack) + stanceHeight;
-    }
-
-    //  printf("\r\nt=%f x=%f y=%f",t,x,y);
-
-}
-
-/**
 * NAME: void CartesianToThetaGamma(float leg_direction)
 * FUNCTION : 笛卡尔坐标转换到伽马坐标 也就是将theta转换成XY
 */
@@ -307,7 +298,7 @@ void CartesianToTheta(float leg_direction)
     float A2=0;
 
     L=sqrt(		pow(x,2)	+		pow(y,2)	);
-    if(L<9.8||L>29.8)
+    if(L<9.8||L>29.8)		//限位保护
         vTaskSuspend(MotorControlTask_Handler);
     N=asin(x/L)*180.0/PI;
     M=acos(	(pow(L,2)+pow(L1,2)-pow(L2,2))/(2*L1*L)	)*180.0/PI;
@@ -330,10 +321,7 @@ void CartesianToTheta(float leg_direction)
 */
 void SetCoupledPosition( int LegId)
 {
-//
-//		pid_reset(pid_t	*pid, float kp, float ki, float kd)
-//
-
+		//限位保护
     if((theta1+theta2)>179||(theta1+theta2)<-179||theta1>150||theta1<-150||theta2>150||theta2<-150)
         vTaskSuspend(MotorControlTask_Handler);
 
@@ -357,15 +345,103 @@ void SetCoupledPosition( int LegId)
         temp_pid.ref_agle[6]=theta1*TransData;
         temp_pid.ref_agle[7]=theta2*TransData;
     }
-    Ready_Flag=1;		//数据填充完毕
+		
+    IsMotoReadyOrNot= IsReady;		//数据填充完毕
 
 }
 
-
+/**
+* NAME: void CommandAllLegs(void)
+* FUNCTION : 控制所有电机
+*/
 void CommandAllLegs(void)
 {
     SetCoupledPosition(0);
     SetCoupledPosition(1);
     SetCoupledPosition(2);
     SetCoupledPosition(3);
+}
+
+/**
+ *
+ * 检测步态增益是否正确
+ * @param  gains LegGain to check
+ * @return       True if valid gains, false if invalid
+ */
+bool IsValidLegGain( LegGain gains) {
+    // check for unstable gains
+    bool bad =  gains.kp_spd < 0 || gains.kd_spd < 0 ||
+                gains.kp_pos < 0 || gains.kd_pos < 0;
+    if (bad) {
+        printf("Invalid gains: <0");
+        return false;
+    }
+    // check for instability / sensor noise amplification
+    bad = bad || gains.kp_spd > 32 || gains.kd_spd > 1 ||
+          gains.kp_pos > 32 || gains.kd_pos > 1;
+    if (bad) {
+        printf("Invalid gains: too high.");
+        return false;
+    }
+    // check for underdamping -> instability
+    bad = bad || (gains.kp_spd > 50 && gains.kd_spd < 0.1);
+    bad = bad || (gains.kp_pos > 50 && gains.kd_pos < 0.1);
+    if (bad) {
+        printf("Invalid gains: underdamped");
+        return false;
+    }
+    return true;
+}
+
+bool IsValidGaitParams( GaitParams params) {
+    const float maxL = 28.8;
+    const float minL = 10.5;
+
+    float stanceHeight = params.stance_height;
+    float downAMP = params.down_amp;
+    float upAMP = params.up_amp;
+    float flightPercent = params.flight_percent;
+    float stepLength = params.step_length;
+    float FREQ = params.freq;
+
+    if (stanceHeight + downAMP > maxL || sqrt(pow(stanceHeight, 2) + pow(stepLength / 2.0, 2)) > maxL) {
+        printf("Gait overextends leg");
+        return false;
+    }
+    if (stanceHeight - upAMP < minL) {
+        printf("Gait underextends leg");
+        return false;
+    }
+
+    if (flightPercent <= 0 || flightPercent > 1.0) {
+        printf("Flight percent is invalid");
+        return false;
+    }
+
+    if (FREQ < 0) {
+        printf("Frequency cannot be negative");
+        return false;
+    }
+
+    if (FREQ > 10.0) {
+        printf("Frequency is too high (>10)");
+        return false;
+    }
+
+    return true;
+}
+
+void ChangeTheGainsOfPD(LegGain gains)
+{
+    uint8_t count=0;
+    if(count>=1) {
+			
+    } else {
+        count++;
+        for (int i = 0; i < 8; i++){
+            pid_reset_kpkd(&pid_pos[i],gains.kp_pos,gains.kd_pos);
+            pid_reset_kpkd(&pid_spd[i],gains.kp_spd,gains.kd_spd);
+				}
+    }
+
 }

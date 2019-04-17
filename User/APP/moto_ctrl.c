@@ -1,10 +1,10 @@
 
 #include "moto_ctrl.h"
 
-
 void send_chassis_cur1_4(int16_t motor1, int16_t motor2, int16_t motor3, int16_t motor4);
 void send_chassis_cur5_8(int16_t motor5, int16_t motor6, int16_t motor7, int16_t motor8);
 
+bool IsMotoReadyOrNot= NotReady;
 float ref_agle[8];
 float temp_angle;
 temp_data temp_pid;      //pid中间数据
@@ -32,12 +32,10 @@ void MotorControl_task(void *pvParameters)
 void moto_behaviour(void)
 {
 
-    if(Ready_Flag==1)
-    {
-        for(int i=0; i<8; i++) {
+    if(IsMotoReadyOrNot== IsReady) {
+        for(int i=0; i<8; i++)
             ref_agle[i]=temp_pid.ref_agle[i];
-        }
-        Ready_Flag=0;
+        IsMotoReadyOrNot= NotReady;
     }
 
     for(int i=0; i<8; i++)
@@ -46,7 +44,6 @@ void moto_behaviour(void)
         temp_pid.out[i] = pid_calc(&pid_spd[i],moto_chassis[i].speed_rpm,pid_pos[i].pos_out);  //速度环 速度控制
     }
     send_chassis_cur1_4(temp_pid.out[0],temp_pid.out[1],temp_pid.out[2],temp_pid.out[3]);		//传递1-4数据给can收发器
-
     send_chassis_cur5_8(temp_pid.out[4],temp_pid.out[5],temp_pid.out[6],temp_pid.out[7]);		//传递5-8数据给can收发器
 
     vTaskDelay(2);		//控制采样频率  实测给 1     7号和8号电机会失控

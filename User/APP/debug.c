@@ -6,7 +6,9 @@ uint16_t time=0;
 uint16_t Number_of_digits;		//算出的每个电机 数据中 数据域的长度
 int16_t Result;
 int16_t	Real_Number[20];		//用ascii码算出相应位中的真实数值 0-9对应48-57
-uint8_t Ready_Flag=0;		//数据填充完毕标志位 【判断电机速度是否都填从完，从而一次性发送，而不是单独的发送造成电机不同步】
+
+//uint8_t Ready_Flag=0;		//数据填充完毕标志位 【判断电机速度是否都填从完，从而一次性发送，而不是单独的发送造成电机不同步】
+
 int8_t Abs_Pos;		//数据的绝对位置
 uint8_t act_flag=0 ;
 extern TaskHandle_t MotorControlTask_Handler;

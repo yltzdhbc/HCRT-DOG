@@ -8,10 +8,7 @@
 
 #define TransData 3591/187*8191/360
 
-extern   float x;
-extern   float y;
-extern   float theta1;
-extern   float theta2;
+static  float x, y, theta1, theta2;
 
 typedef struct
 {

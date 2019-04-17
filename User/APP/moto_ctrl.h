@@ -3,6 +3,9 @@
 
 #include "robocon.h"
 
+#define IsReady  1
+#define NotReady 0
+
 void moto_behaviour(void);
 void moto_param_init(void);
 void coordinate_trans(float X,float Y);
@@ -12,6 +15,9 @@ typedef struct
     float ref_agle[8];
     float out[8];
 } temp_data;
+
+
+extern bool IsMotoReadyOrNot;
 
 extern temp_data temp_pid;
 #endif

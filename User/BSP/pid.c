@@ -49,7 +49,7 @@ static void pid_reset(pid_t	*pid, float kp, float ki, float kd)
     pid->d = kd;
 }
 
-static void pid_reset_kpkd(pid_t	*pid, float kp, float kd)
+void pid_reset_kpkd(pid_t	*pid, float kp, float kd)
 {
     pid->p = kp;
     pid->d = kd;

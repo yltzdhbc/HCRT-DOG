@@ -27,46 +27,6 @@ Project File Date:  04/11/2019
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'MR2'
-compiling usart.c...
-..\User\AHRS\imu.h(42): warning:  #1295-D: Deprecated declaration IMU_Get_Data - give arg types
-  void IMU_Get_Data();
-..\User\HARDWARE\buzzer.h(17): warning:  #47-D: incompatible redefinition of macro "L1"  (declared at line 6 of "..\User\APP\posture_ctrl.h")
-  #define  L1       ((proport/131)-1)//低调　do 的周期根据Tout= ((arr+1)*(psc+1))/Tclk推出arr值就是本句define定义的值，Tout为音调频率131Hz的倒数，Tclk=72MHz
-..\User\HARDWARE\buzzer.h(18): warning:  #47-D: incompatible redefinition of macro "L2"  (declared at line 7 of "..\User\APP\posture_ctrl.h")
-  #define  L2       ((proport/147)-1)//低调　re 的周期
-..\Src\usart.c: 3 warnings, 0 errors
-compiling main.c...
-..\User\AHRS\imu.h(42): warning:  #1295-D: Deprecated declaration IMU_Get_Data - give arg types
-  void IMU_Get_Data();
-..\User\HARDWARE\buzzer.h(17): warning:  #47-D: incompatible redefinition of macro "L1"  (declared at line 6 of "..\User\APP\posture_ctrl.h")
-  #define  L1       ((proport/131)-1)//低调　do 的周期根据Tout= ((arr+1)*(psc+1))/Tclk推出arr值就是本句define定义的值，Tout为音调频率131Hz的倒数，Tclk=72MHz
-..\User\HARDWARE\buzzer.h(18): warning:  #47-D: incompatible redefinition of macro "L2"  (declared at line 7 of "..\User\APP\posture_ctrl.h")
-  #define  L2       ((proport/147)-1)//低调　re 的周期
-../Src/main.c: 3 warnings, 0 errors
-compiling tim.c...
-..\User\AHRS\imu.h(42): warning:  #1295-D: Deprecated declaration IMU_Get_Data - give arg types
-  void IMU_Get_Data();
-..\User\HARDWARE\buzzer.h(17): warning:  #47-D: incompatible redefinition of macro "L1"  (declared at line 6 of "..\User\APP\posture_ctrl.h")
-  #define  L1       ((proport/131)-1)//低调　do 的周期根据Tout= ((arr+1)*(psc+1))/Tclk推出arr值就是本句define定义的值，Tout为音调频率131Hz的倒数，Tclk=72MHz
-..\User\HARDWARE\buzzer.h(18): warning:  #47-D: incompatible redefinition of macro "L2"  (declared at line 7 of "..\User\APP\posture_ctrl.h")
-  #define  L2       ((proport/147)-1)//低调　re 的周期
-..\Src\tim.c: 3 warnings, 0 errors
-compiling moto_ctrl.c...
-..\User\AHRS\imu.h(42): warning:  #1295-D: Deprecated declaration IMU_Get_Data - give arg types
-  void IMU_Get_Data();
-..\User\HARDWARE\buzzer.h(17): warning:  #47-D: incompatible redefinition of macro "L1"  (declared at line 6 of "..\User\APP\posture_ctrl.h")
-  #define  L1       ((proport/131)-1)//低调　do 的周期根据Tout= ((arr+1)*(psc+1))/Tclk推出arr值就是本句define定义的值，Tout为音调频率131Hz的倒数，Tclk=72MHz
-..\User\HARDWARE\buzzer.h(18): warning:  #47-D: incompatible redefinition of macro "L2"  (declared at line 7 of "..\User\APP\posture_ctrl.h")
-  #define  L2       ((proport/147)-1)//低调　re 的周期
-..\User\APP\moto_ctrl.c: 3 warnings, 0 errors
-compiling debug.c...
-..\User\AHRS\imu.h(42): warning:  #1295-D: Deprecated declaration IMU_Get_Data - give arg types
-  void IMU_Get_Data();
-..\User\HARDWARE\buzzer.h(17): warning:  #47-D: incompatible redefinition of macro "L1"  (declared at line 6 of "..\User\APP\posture_ctrl.h")
-  #define  L1       ((proport/131)-1)//低调　do 的周期根据Tout= ((arr+1)*(psc+1))/Tclk推出arr值就是本句define定义的值，Tout为音调频率131Hz的倒数，Tclk=72MHz
-..\User\HARDWARE\buzzer.h(18): warning:  #47-D: incompatible redefinition of macro "L2"  (declared at line 7 of "..\User\APP\posture_ctrl.h")
-  #define  L2       ((proport/147)-1)//低调　re 的周期
-..\User\APP\debug.c: 3 warnings, 0 errors
 compiling posture_ctrl.c...
 ..\User\AHRS\imu.h(42): warning:  #1295-D: Deprecated declaration IMU_Get_Data - give arg types
   void IMU_Get_Data();
@@ -74,65 +34,41 @@ compiling posture_ctrl.c...
   #define L1 10
 ..\User\APP\posture_ctrl.h(7): warning:  #47-D: incompatible redefinition of macro "L2"  (declared at line 18 of "..\User\HARDWARE\buzzer.h")
   #define L2 20
-..\User\APP\posture_ctrl.c(284): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\APP\posture_ctrl.c(238): warning:  #1035-D: single-precision operand implicitly converted to double-precision
           x = (gp/flightPercent)*stepLength - stepLength/2.0;
-..\User\APP\posture_ctrl.c(288): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\APP\posture_ctrl.c(242): warning:  #1035-D: single-precision operand implicitly converted to double-precision
           float percentBack = (gp-flightPercent)/(1.0-flightPercent);
-..\User\APP\posture_ctrl.c(289): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\APP\posture_ctrl.c(243): warning:  #1035-D: single-precision operand implicitly converted to double-precision
           x = -percentBack*stepLength + stepLength/2.0;
-..\User\APP\posture_ctrl.c(310): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-      if(L<9.8||L>29.8)
-..\User\APP\posture_ctrl.c(310): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-      if(L<9.8||L>29.8)
-..\User\APP\posture_ctrl.c(317): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\APP\posture_ctrl.c(301): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      if(L<9.8||L>29.8)		//限位保护
+..\User\APP\posture_ctrl.c(301): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      if(L<9.8||L>29.8)		//限位保护
+..\User\APP\posture_ctrl.c(308): warning:  #1035-D: single-precision operand implicitly converted to double-precision
       if(leg_direction==1.0) {
-..\User\APP\posture_ctrl.c(318): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\APP\posture_ctrl.c(309): warning:  #1035-D: single-precision operand implicitly converted to double-precision
           theta2=(A1-90.0);
-..\User\APP\posture_ctrl.c(319): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\APP\posture_ctrl.c(310): warning:  #1035-D: single-precision operand implicitly converted to double-precision
           theta1=(A2-90.0);
-..\User\APP\posture_ctrl.c(321): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\APP\posture_ctrl.c(312): warning:  #1035-D: single-precision operand implicitly converted to double-precision
           theta1=(A1-90.0);
-..\User\APP\posture_ctrl.c(322): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\APP\posture_ctrl.c(313): warning:  #1035-D: single-precision operand implicitly converted to double-precision
           theta2=(A2-90.0);
-..\User\APP\posture_ctrl.c(371): warning:  #1-D: last line of file ends without a newline
-  }
-..\User\APP\posture_ctrl.c: 14 warnings, 0 errors
-compiling buzzer.c...
-..\User\AHRS\imu.h(42): warning:  #1295-D: Deprecated declaration IMU_Get_Data - give arg types
-  void IMU_Get_Data();
-..\User\HARDWARE\buzzer.h(17): warning:  #47-D: incompatible redefinition of macro "L1"  (declared at line 6 of "..\User\APP\posture_ctrl.h")
-  #define  L1       ((proport/131)-1)//低调　do 的周期根据Tout= ((arr+1)*(psc+1))/Tclk推出arr值就是本句define定义的值，Tout为音调频率131Hz的倒数，Tclk=72MHz
-..\User\HARDWARE\buzzer.h(18): warning:  #47-D: incompatible redefinition of macro "L2"  (declared at line 7 of "..\User\APP\posture_ctrl.h")
-  #define  L2       ((proport/147)-1)//低调　re 的周期
-..\User\HARDWARE\buzzer.c: 3 warnings, 0 errors
-compiling vcan.c...
-..\User\AHRS\imu.h(42): warning:  #1295-D: Deprecated declaration IMU_Get_Data - give arg types
-  void IMU_Get_Data();
-..\User\HARDWARE\buzzer.h(17): warning:  #47-D: incompatible redefinition of macro "L1"  (declared at line 6 of "..\User\APP\posture_ctrl.h")
-  #define  L1       ((proport/131)-1)//低调　do 的周期根据Tout= ((arr+1)*(psc+1))/Tclk推出arr值就是本句define定义的值，Tout为音调频率131Hz的倒数，Tclk=72MHz
-..\User\HARDWARE\buzzer.h(18): warning:  #47-D: incompatible redefinition of macro "L2"  (declared at line 7 of "..\User\APP\posture_ctrl.h")
-  #define  L2       ((proport/147)-1)//低调　re 的周期
-..\User\BSP\vcan.c: 3 warnings, 0 errors
-compiling led.c...
-..\User\AHRS\imu.h(42): warning:  #1295-D: Deprecated declaration IMU_Get_Data - give arg types
-  void IMU_Get_Data();
-..\User\HARDWARE\buzzer.h(17): warning:  #47-D: incompatible redefinition of macro "L1"  (declared at line 6 of "..\User\APP\posture_ctrl.h")
-  #define  L1       ((proport/131)-1)//低调　do 的周期根据Tout= ((arr+1)*(psc+1))/Tclk推出arr值就是本句define定义的值，Tout为音调频率131Hz的倒数，Tclk=72MHz
-..\User\HARDWARE\buzzer.h(18): warning:  #47-D: incompatible redefinition of macro "L2"  (declared at line 7 of "..\User\APP\posture_ctrl.h")
-  #define  L2       ((proport/147)-1)//低调　re 的周期
-..\User\HARDWARE\led.c: 3 warnings, 0 errors
-compiling servo.c...
-..\User\AHRS\imu.h(42): warning:  #1295-D: Deprecated declaration IMU_Get_Data - give arg types
-  void IMU_Get_Data();
-..\User\HARDWARE\buzzer.h(17): warning:  #47-D: incompatible redefinition of macro "L1"  (declared at line 6 of "..\User\APP\posture_ctrl.h")
-  #define  L1       ((proport/131)-1)//低调　do 的周期根据Tout= ((arr+1)*(psc+1))/Tclk推出arr值就是本句define定义的值，Tout为音调频率131Hz的倒数，Tclk=72MHz
-..\User\HARDWARE\buzzer.h(18): warning:  #47-D: incompatible redefinition of macro "L2"  (declared at line 7 of "..\User\APP\posture_ctrl.h")
-  #define  L2       ((proport/147)-1)//低调　re 的周期
-..\User\HARDWARE\servo.c: 3 warnings, 0 errors
+..\User\APP\posture_ctrl.c(387): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      bad = bad || (gains.kp_spd > 50 && gains.kd_spd < 0.1);
+..\User\APP\posture_ctrl.c(388): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      bad = bad || (gains.kp_pos > 50 && gains.kd_pos < 0.1);
+..\User\APP\posture_ctrl.c(407): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      if (stanceHeight + downAMP > maxL || sqrt(pow(stanceHeight, 2) + pow(stepLength / 2.0, 2)) > maxL) {
+..\User\APP\posture_ctrl.c(416): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      if (flightPercent <= 0 || flightPercent > 1.0) {
+..\User\APP\posture_ctrl.c(426): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+      if (FREQ > 10.0) {
+..\User\APP\posture_ctrl.c: 18 warnings, 0 errors
 linking...
-Program Size: Code=30356 RO-data=1724 RW-data=808 ZI-data=39664  
+Program Size: Code=31216 RO-data=1728 RW-data=812 ZI-data=39660  
 FromELF: creating hex file...
-".\MR2\MR2.axf" - 0 Error(s), 41 Warning(s).
+".\MR2\MR2.axf" - 0 Error(s), 18 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -155,7 +91,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.1.1
-Build Time Elapsed:  00:00:21
+Build Time Elapsed:  00:00:08
 </pre>
 </body>
 </html>
