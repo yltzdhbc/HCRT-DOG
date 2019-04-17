@@ -42,6 +42,7 @@
 ".\mr2\posture_ctrl.o"
 ".\mr2\moto_ctrl.o"
 ".\mr2\debug.o"
+".\mr2\detect_task.o"
 ".\mr2\imu.o"
 ".\mr2\pid.o"
 ".\mr2\bsp_can.o"

@@ -7,8 +7,6 @@ uint16_t Number_of_digits;		//算出的每个电机 数据中 数据域的长度
 int16_t Result;
 int16_t	Real_Number[20];		//用ascii码算出相应位中的真实数值 0-9对应48-57
 
-//uint8_t Ready_Flag=0;		//数据填充完毕标志位 【判断电机速度是否都填从完，从而一次性发送，而不是单独的发送造成电机不同步】
-
 int8_t Abs_Pos;		//数据的绝对位置
 uint8_t act_flag=0 ;
 extern TaskHandle_t MotorControlTask_Handler;
@@ -72,11 +70,19 @@ void InterpretCommand(void)
         case 'W':
             state = WALK;
             break;
-        case 'R':
-            state = ROTATE;
-            break;
+//        case 'R':
+//            state = ROTATE;
+//            break;
         case 'E':
+            state = STOP;
+				vTaskDelay(100);
             vTaskSuspend(MotorControlTask_Handler);
+            break;
+        case 'R':
+            state = STOP;
+				vTaskDelay(100);
+            vTaskResume(MotorControlTask_Handler);
+            break;
             break;
         case 'a':
             state = WALK_AHEAD;
@@ -142,8 +148,8 @@ void InterpretCommand(void)
             //printf("\r\n%d	%d	%d	%d     %d \r\n",USART_RX_BUF[0],USART_RX_BUF[1],USART_RX_BUF[2],USART_RX_BUF[3],len);
             printf("\r\n  Unknown command   \r\n");
             break;
-				
-				//vTaskDelay(20);
+
+            //vTaskDelay(20);
         }
 
         while(__HAL_UART_GET_FLAG(&huart2,UART_FLAG_TC)!=SET);		//等待发送结束
@@ -153,7 +159,7 @@ void InterpretCommand(void)
             USART_RX_BUF[i]=0;
 
         USART_RX_STA=0;
-			
+
     } else
     {
         time++;

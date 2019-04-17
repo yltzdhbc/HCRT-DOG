@@ -11,7 +11,7 @@ void start_task(void *pvParameters);		//任务函数
 TaskHandle_t MotorControlTask_Handler;		//任务句柄
 void MotorControl_task(void *pvParameters);	//任务函数
 
-#define Debug_TASK_PRIO		4		//任务优先级
+#define Debug_TASK_PRIO		5		//任务优先级
 #define Debug_STK_SIZE 		512  //任务堆栈大小	
 TaskHandle_t DebugTask_Handler;		//任务句柄
 void Debug_task(void *pvParameters);		//任务函数
@@ -21,10 +21,10 @@ void Debug_task(void *pvParameters);		//任务函数
 TaskHandle_t PostureControlTask_Handler;		//任务句柄
 void PostureControl_task(void *pvParameters);		//任务函数
 
-#define TASK4_TASK_PRIO		4		//任务优先级
-#define TASK4_STK_SIZE 		128 	 //任务堆栈大小	
-TaskHandle_t Task4Task_Handler;		//任务句柄
-void task4_task(void *pvParameters);		//任务函数
+#define Detect_TASK_PRIO		4		//任务优先级
+#define Detect_STK_SIZE 		128 	 //任务堆栈大小	
+TaskHandle_t DetectTask_Handler;		//任务句柄
+void Detect_task(void *pvParameters);		//任务函数
 
 #define TEST_TASK_PRIO		4		//任务优先级
 #define TEST_STK_SIZE 		512 	 //任务堆栈大小	
@@ -45,33 +45,26 @@ int main(void)
     HAL_Init();						//Hal库初始化
     SystemClock_Config();	//系统时钟初始化
     MX_GPIO_Init();				//GPIO初始化
-		MX_DMA_Init();
+    MX_DMA_Init();				//DMA初始化
     MX_CAN1_Init();				//CAN1接口初始化
-		MX_CAN2_Init();
+    MX_CAN2_Init();				//CAN1接口初始化
     MX_SPI5_Init();				//spi5初始化
     MX_USART2_UART_Init();//usart2串口初始化
-		MX_UART7_Init();
-		MX_NVIC_Init();
-		//定时器时钟90M分频系数9000-1,定时器3的频率90M/9000=10K自动重装载10-1,定时器周期1ms
+    MX_UART7_Init();			//uart7发送波形给上位机
+    MX_NVIC_Init();				//中断优先级初始化
+    //定时器时钟90M分频系数9000-1,定时器3的频率90M/9000=10K自动重装载10-1,定时器周期1ms
     TIM3_Init(10-1,9000-1);
 
     moto_param_init();		//电机PID参数初始化
     buzzer_init(500-1, 90-1);//蜂鸣器初始化
     led_configuration();	//流水灯 红绿灯初始化
-		//f=Tck/(psc+1)*(arr+1) 定时器时钟为90M  50Hz=180MHz/(3000*1200)   330HZ=180MHZ/(3000*182)
-    Servo_Init(20000-1,90-1);		
-	
-//	HAL_UART_Transmit_DMA(&huart2, (uint8_t*)res, 4);
-//	HAL_UART_Receive_DMA(&huart2, USART2RxBuf, USART2RXBUFSIZE);
-//	mpu_device_init();
-//	init_quaternion();
-//	Servo1_DOWN;
-//	Servo2_DOWN_POS;
+    //f=Tck/(psc+1)*(arr+1) 定时器时钟为90M  50Hz=180MHz/(3000*1200)   330HZ=180MHZ/(3000*182)
+    Servo_Init(20000-1,90-1);
 
     Servo1_TEST_POSITION;
     Servo2_TEST_POSITION;
-		printf("system init\r\n");
-		
+    printf("system init\r\n");
+
     //创建开始任务
     xTaskCreate((TaskFunction_t )start_task,            //任务函数
                 (const char*    )"start_task",          //任务名称
@@ -88,14 +81,14 @@ void start_task(void *pvParameters)
 {
 
     taskENTER_CRITICAL();           //进入临界区
-    //创建MotorControl_task		
+    //创建MotorControl_task
     xTaskCreate((TaskFunction_t )MotorControl_task,
                 (const char*    )"MotorControl_task",
                 (uint16_t       )MotorControl_STK_SIZE,
                 (void*          )NULL,
                 (UBaseType_t    )MotorControl_TASK_PRIO,
                 (TaskHandle_t*  )&MotorControlTask_Handler);
-    //创建Debug_task			
+    //创建Debug_task
     xTaskCreate((TaskFunction_t )Debug_task,
                 (const char*    )"Debug_task",
                 (uint16_t       )Debug_STK_SIZE,
@@ -109,13 +102,13 @@ void start_task(void *pvParameters)
                 (void*          )NULL,
                 (UBaseType_t    )PostureControl_TASK_PRIO,
                 (TaskHandle_t*  )&PostureControlTask_Handler);
-    //创建TASK4任务
-    xTaskCreate((TaskFunction_t )task4_task,
-                (const char*    )"task4_task",
-                (uint16_t       )TASK4_STK_SIZE,
+    //创建Detect任务
+    xTaskCreate((TaskFunction_t )Detect_task,
+                (const char*    )"Detect_task",
+                (uint16_t       )Detect_STK_SIZE,
                 (void*          )NULL,
-                (UBaseType_t    )TASK4_TASK_PRIO,
-                (TaskHandle_t*  )&Task4Task_Handler);
+                (UBaseType_t    )Detect_TASK_PRIO,
+                (TaskHandle_t*  )&DetectTask_Handler);
     //创建Test任务
     xTaskCreate((TaskFunction_t )Test_task,
                 (const char*    )"Test_task",
@@ -123,14 +116,14 @@ void start_task(void *pvParameters)
                 (void*          )NULL,
                 (UBaseType_t    )TEST_TASK_PRIO,
                 (TaskHandle_t*  )&TestTask_Handler);
- //创建VcanGC任务
+    //创建VcanGC任务
     xTaskCreate((TaskFunction_t )VcanGC_task,
                 (const char*    )"VcanGC_task",
                 (uint16_t       )VcanGC_STK_SIZE,
                 (void*          )NULL,
                 (UBaseType_t    )VcanGC_TASK_PRIO,
                 (TaskHandle_t*  )&VcanGCTask_Handler);
-								
+
     vTaskDelete(StartTask_Handler); //删除开始任务
     taskEXIT_CRITICAL();            //退出临界区
 
@@ -141,7 +134,8 @@ uint32_t Timetick1ms = 0;
 void Test_task(void *pvParameters)
 {
 
-	int count=0;
+    int count=0;
+
     for(;;) {
 
 //	mpu_get_data();
@@ -153,19 +147,17 @@ void Test_task(void *pvParameters)
 //	HAL_Delay(5);
 //
 //	Servo_DOWN;
-			
-			
-		wave_form_data[0] =count;
-		wave_form_data[1] =count;
-		wave_form_data[2] =count;
-		count+=10;
-    vTaskDelay(500);
-			
-			
+
+//		wave_form_data[0] =count;
+//		wave_form_data[1] =count;
+//		wave_form_data[2] =count;
+//		count+=10;
+//    vTaskDelay(500);
+//
+//
 //		Servo_PEAK;
 
     }
-
 
 //        printf("\r\ngiven_current%d given_current2=%d 温度1=%d 角度=%d\r\n ",moto_chassis[2].given_current,moto_chassis[3].given_current,moto_chassis[2].hall,moto_chassis[3].total_angle);
 //        printf("\r\n t=%llu",time);
@@ -223,15 +215,15 @@ void SystemClock_Config(void)
 }
 static void MX_NVIC_Init(void)
 {
-  /* USART2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(USART2_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(USART2_IRQn);
-  /* DMA1_Stream5_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
-  /* DMA1_Stream6_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
+    /* USART2_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(USART2_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(USART2_IRQn);
+    /* DMA1_Stream5_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
+    /* DMA1_Stream6_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
 }
 
 void Error_Handler(void)

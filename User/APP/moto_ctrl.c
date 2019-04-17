@@ -16,7 +16,7 @@ temp_data temp_pid;      //pid中间数据
  *******************************************************************************************/
 void MotorControl_task(void *pvParameters)
 {
-
+		BeginWarnBuzzer();
     my_can_filter_init_recv_all(&hcan1);
     HAL_CAN_Receive_IT(&hcan1, CAN_FIFO0);
     HAL_CAN_Receive_IT(&hcan2, CAN_FIFO0);

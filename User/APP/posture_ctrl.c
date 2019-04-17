@@ -17,7 +17,7 @@ bool IsValidLegGain( LegGain gains);
 bool IsValidGaitParams( GaitParams params);
 void ChangeTheGainsOfPD(LegGain gains);
 
-static  float x, y, theta1, theta2;
+static float x, y, theta1, theta2;
 
 enum States state = STOP;
 
@@ -169,7 +169,7 @@ void gait_detached(	GaitParams params_left,GaitParams params_right,
     //  const float leg3_direction = 1.0;
     CoupledMoveLeg( t, params_right, leg3_offset, leg3_direction, 3);
 
-		
+
 }
 
 /**
@@ -198,9 +198,9 @@ void gait(	GaitParams params,LegGain gains,
 
     //  const float leg3_direction = 1.0;
     CoupledMoveLeg( t, params, leg3_offset, leg3_direction, 3);
-		
-		//改变PD
-		ChangeTheGainsOfPD(gains);
+
+    //改变PD
+    ChangeTheGainsOfPD(gains);
 }
 
 /**
@@ -321,8 +321,8 @@ void CartesianToTheta(float leg_direction)
 */
 void SetCoupledPosition( int LegId)
 {
-		//限位保护
-    if((theta1+theta2)>179||(theta1+theta2)<-179||theta1>150||theta1<-150||theta2>150||theta2<-150)
+    //限位保护
+    if((theta1+theta2)>170||(theta1+theta2)<-170||theta1>140||theta1<-140||theta2>140||theta2<-140)
         vTaskSuspend(MotorControlTask_Handler);
 
     if(LegId==0)
@@ -345,7 +345,7 @@ void SetCoupledPosition( int LegId)
         temp_pid.ref_agle[6]=theta1*TransData;
         temp_pid.ref_agle[7]=theta2*TransData;
     }
-		
+
     IsMotoReadyOrNot= IsReady;		//数据填充完毕
 
 }
@@ -374,6 +374,7 @@ bool IsValidLegGain( LegGain gains) {
                 gains.kp_pos < 0 || gains.kd_pos < 0;
     if (bad) {
         printf("Invalid gains: <0");
+        vTaskDelay(500);
         return false;
     }
     // check for instability / sensor noise amplification
@@ -381,6 +382,7 @@ bool IsValidLegGain( LegGain gains) {
           gains.kp_pos > 32 || gains.kd_pos > 1;
     if (bad) {
         printf("Invalid gains: too high.");
+        vTaskDelay(500);
         return false;
     }
     // check for underdamping -> instability
@@ -388,14 +390,15 @@ bool IsValidLegGain( LegGain gains) {
     bad = bad || (gains.kp_pos > 50 && gains.kd_pos < 0.1);
     if (bad) {
         printf("Invalid gains: underdamped");
+        vTaskDelay(500);
         return false;
     }
     return true;
 }
 
 bool IsValidGaitParams( GaitParams params) {
-    const float maxL = 28.8;
-    const float minL = 10.5;
+    const float maxL = 29.8;
+    const float minL = 10.1;
 
     float stanceHeight = params.stance_height;
     float downAMP = params.down_amp;
@@ -406,25 +409,30 @@ bool IsValidGaitParams( GaitParams params) {
 
     if (stanceHeight + downAMP > maxL || sqrt(pow(stanceHeight, 2) + pow(stepLength / 2.0, 2)) > maxL) {
         printf("Gait overextends leg");
+        vTaskDelay(500);
         return false;
     }
     if (stanceHeight - upAMP < minL) {
         printf("Gait underextends leg");
+        vTaskDelay(500);
         return false;
     }
 
     if (flightPercent <= 0 || flightPercent > 1.0) {
         printf("Flight percent is invalid");
+        vTaskDelay(500);
         return false;
     }
 
     if (FREQ < 0) {
         printf("Frequency cannot be negative");
+        vTaskDelay(500);
         return false;
     }
 
     if (FREQ > 10.0) {
         printf("Frequency is too high (>10)");
+        vTaskDelay(500);
         return false;
     }
 
@@ -435,13 +443,13 @@ void ChangeTheGainsOfPD(LegGain gains)
 {
     uint8_t count=0;
     if(count>=1) {
-			
+
     } else {
         count++;
-        for (int i = 0; i < 8; i++){
+        for (int i = 0; i < 8; i++) {
             pid_reset_kpkd(&pid_pos[i],gains.kp_pos,gains.kd_pos);
             pid_reset_kpkd(&pid_spd[i],gains.kp_spd,gains.kd_spd);
-				}
+        }
     }
 
 }
